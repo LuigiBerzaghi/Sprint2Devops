@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body th:with="pageTitle=${'Registrar Movimentação - Moto ' + idMoto}, content=~{::content}"
+      th:insert="~{fragments/_layout}">
+<div th:fragment="content" class="col-lg-8">
+  <h1 class="h4 mb-3">Registrar Movimentação — Moto <span th:text="${idMoto}">—</span></h1>
+
+  <form th:object="${dto}" th:action="@{|/motos/${idMoto}/movimentacoes|}" method="post">
+    <input type="hidden" th:field="*{idMoto}" th:value="${idMoto}"/>
+
+    <div class="mb-3">
+      <label class="form-label">Ponto</label>
+      <select class="form-select" th:field="*{idPonto}">
+        <option value="" disabled th:selected="${dto.idPonto} == null">Selecione...</option>
+        <option th:each="po : ${pontos}" th:value="${po.idPonto}"
+                th:text="${po.idPonto + ' - ' + po.nomePonto}"></option>
+      </select>
+      <div class="text-danger small" th:if="${#fields.hasErrors('idPonto')}" th:errors="*{idPonto}"></div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Data/Hora</label>
+      <input type="datetime-local" class="form-control" th:field="*{dataHora}"/>
+      <div class="text-danger small" th:if="${#fields.hasErrors('dataHora')}" th:errors="*{dataHora}"></div>
+    </div>
+
+    <div class="d-flex gap-2">
+      <button class="btn btn-primary">Salvar</button>
+      <a class="btn btn-outline-secondary" th:href="@{|/motos/${idMoto}/movimentacoes|}">Cancelar</a>
+    </div>
+  </form>
+</div>
+</body>
+</html>

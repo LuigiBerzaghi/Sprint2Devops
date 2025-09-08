@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body th:with="pageTitle=${isNew} ? 'Novo Pátio' : 'Editar Pátio', content=~{::content}"
+      th:insert="~{fragments/_layout}">
+<div th:fragment="content" class="col-lg-8">
+  <h1 class="h4 mb-3" th:text="${pageTitle}">Novo Pátio</h1>
+
+  <form th:object="${dto}"
+        th:action="${isNew} ? @{/patios} : @{|/patios/${dto.idPatio}|}"
+        method="post">
+    <!-- Para UPDATE via PUT -->
+    <input type="hidden" name="_method" value="put" th:if="${!isNew}"/>
+
+    <!-- ID só aparece no modo edição, e só para visualização -->
+    <div class="mb-3" th:if="${!isNew}">
+      <label class="form-label">ID do Pátio</label>
+      <input class="form-control" th:value="*{idPatio}" readonly/>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Nome</label>
+      <input class="form-control" th:field="*{nome}"/>
+      <div class="text-danger small" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}"></div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Telefone</label>
+      <input class="form-control" th:field="*{telefone}"/>
+      <div class="text-danger small" th:if="${#fields.hasErrors('telefone')}" th:errors="*{telefone}"></div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Endereço</label>
+      <input class="form-control" th:field="*{endereco}"/>
+      <div class="text-danger small" th:if="${#fields.hasErrors('endereco')}" th:errors="*{endereco}"></div>
+    </div>
+
+    <div class="d-flex gap-2">
+      <button class="btn btn-primary">Salvar</button>
+      <a class="btn btn-outline-secondary" th:href="@{/patios}">Cancelar</a>
+    </div>
+  </form>
+</div>
+</body>
+</html>

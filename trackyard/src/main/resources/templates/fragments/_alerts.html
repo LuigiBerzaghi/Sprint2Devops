@@ -1,0 +1,6 @@
+<div xmlns:th="http://www.thymeleaf.org" th:fragment="alerts">
+  <div th:if="${msgSuccess}" class="alert alert-success" role="alert" th:text="${msgSuccess}"></div>
+  <div th:if="${msgError}"   class="alert alert-danger"  role="alert" th:text="${msgError}"></div>
+  <div th:if="${msgWarn}"    class="alert alert-warning" role="alert" th:text="${msgWarn}"></div>
+  <div th:if="${msgInfo}"    class="alert alert-info"    role="alert" th:text="${msgInfo}"></div>
+</div>
