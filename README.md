@@ -77,14 +77,6 @@ A aplicação sobe em:
 
 ---
 
-## 📌 Observações
-
-- Não versionar credenciais reais.  
-- Opcional: forneça um arquivo `.env.example` para facilitar a configuração local.  
-- Em produção (Azure App Service ou Docker), defina as variáveis de ambiente direto no serviço.  
-
----
-
 ## 👥 Equipe
 
 - Nome do integrante 1 - RMXXXXX  
