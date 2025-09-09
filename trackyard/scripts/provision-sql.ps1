@@ -38,7 +38,7 @@ if ($AllowAzureServices) {
 }
 
 if ($AllowClientIP) {
-  $ip = (Invoke-RestMethod -Uri "https://api.ipify.org")
+  $ip = (Invoke-RestMethod -Uri "https://api.ipify.org?format=text" -TimeoutSec 10)
   Write-Host "==> Liberando IP do cliente: $ip …"
   az sql server firewall-rule create `
     -g $ResourceGroup -s $SqlServerName `
@@ -47,12 +47,31 @@ if ($AllowClientIP) {
     --end-ip-address $ip | Out-Null
 }
 
-# Monta JDBC pronta
+# Monta JDBC 
 $serverFqdn = "$SqlServerName.database.windows.net"
-$jdbc = "jdbc:sqlserver://$serverFqdn:1433;database=$DbName;user=$AdminUser@$SqlServerName;password=$AdminPass;encrypt=true;trustServerCertificate=false;loginTimeout=30;"
+$jdbc = "jdbc:sqlserver://$serverFqdn"+":1433;databaseName=$DbName;encrypt=true;trustServerCertificate=false;loginTimeout=30"
+
+# Bloco pronto para o Spring Boot
+$springBlock = @"
+spring.datasource.url=$jdbc
+spring.datasource.username=$AdminUser
+spring.datasource.password=$AdminPass
+spring.datasource.driver-class-name=com.microsoft.sqlserver.jdbc.SQLServerDriver
+"@
 
 Write-Host "`n===== SAÍDA ====="
 Write-Host "Server FQDN : $serverFqdn"
 Write-Host "Database    : $DbName"
-Write-Host "Username    : $AdminUser@$SqlServerName"
+Write-Host "Username    : $AdminUser"   
 Write-Host "JDBC        : $jdbc"
+Write-Host "`nAgora rode os seguintes comandos nesta janela do PowerShell para exportar as variáveis de ambiente:"
+Write-Host ""
+Write-Host "`$env:SPRING_DATASOURCE_URL = `"$jdbc`""
+Write-Host "`$env:SPRING_DATASOURCE_USERNAME = `"$AdminUser`""
+Write-Host "`$env:SPRING_DATASOURCE_PASSWORD = `"$AdminPass`""
+Write-Host "`$env:SPRING_DATASOURCE_DRIVER_CLASS_NAME = `"com.microsoft.sqlserver.jdbc.SQLServerDriver`""
+Write-Host ""
+Write-Host "Depois rode sua aplicação com: mvn spring-boot:run"
+
+
+
