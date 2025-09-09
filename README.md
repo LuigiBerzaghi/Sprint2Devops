@@ -18,7 +18,7 @@ Aplicação **Spring Boot** com integração ao **Azure SQL Database**, desenvol
 Execute o script PowerShell para criar o **Resource Group**, **Servidor SQL** e **Database**:
 
 ```powershell
-cd scripts
+cd Sprint2Devops/scripts/trackyard/scripts
 .\provision-sql.ps1 -AdminPass "SuaSenhaForte123!"
 ```
 
