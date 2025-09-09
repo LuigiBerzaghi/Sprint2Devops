@@ -63,6 +63,9 @@ A aplicação sobe em:
 /scripts      # Script provision-sql.ps1 para criar Azure SQL
 /pom.xml      # Configuração Maven
 ```
+## 📌Observações
+
+- É necessário estar logado na Azure para o funcionamento dos scripts
 
 ---
 
