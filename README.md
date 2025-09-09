@@ -56,6 +56,14 @@ A aplicação sobe em:
 
 ---
 
+## Ao parar a execução
+Desfaz o grupo de recursos:
+```powershell
+az group delete --name rg-trackyard --yes --no-wait
+```
+
+---
+
 ## 📂 Estrutura relevante
 
 ```
