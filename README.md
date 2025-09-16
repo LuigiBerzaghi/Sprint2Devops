@@ -21,7 +21,7 @@ Execute o script PowerShell para criar o **Resource Group**, **Servidor SQL**, *
 
 ```powershell
 cd Sprint2Devops/trackyard/scripts
-.\provision-sql.ps1 -AdminPass "SuaSenhaForte123!"
+.\provision-sql.ps1 -AdminPass "<senha>"
 ```
 
 ---
