@@ -6,13 +6,14 @@ Param(
   [string]$AdminUser = "adminuser",
   [string]$AdminPass = "SenhaSuperSegura123!",
   [switch]$AllowAzureServices = $true,
-  [switch]$AllowClientIP = $true
+  [switch]$AllowClientIP = $true,
+  [string]$Plan = "planTrackyard"
 )
 
-Write-Host "==> Criando Resource Group $ResourceGroup em $Location …"
+Write-Host "==> Criando Resource Group $ResourceGroup em $Location "
 az group create -n $ResourceGroup -l $Location | Out-Null
 
-Write-Host "==> Criando SQL Server $SqlServerName …"
+Write-Host "==> Criando SQL Server $SqlServerName "
 az sql server create `
   -g $ResourceGroup `
   -n $SqlServerName `
@@ -20,7 +21,7 @@ az sql server create `
   -p $AdminPass `
   -l $Location | Out-Null
 
-Write-Host "==> Criando Database $DbName (S0, backup Local)…"
+Write-Host "==> Criando Database $DbName "
 az sql db create `
   -g $ResourceGroup `
   -s $SqlServerName `
@@ -29,7 +30,7 @@ az sql db create `
   --backup-storage-redundancy Local | Out-Null
 
 if ($AllowAzureServices) {
-  Write-Host "==> Liberando Azure Services (0.0.0.0)…"
+  Write-Host "==> Liberando Azure Services (0.0.0.0)"
   az sql server firewall-rule create `
     -g $ResourceGroup -s $SqlServerName `
     -n AllowAzureServices `
@@ -49,29 +50,35 @@ if ($AllowClientIP) {
 
 # Monta JDBC 
 $serverFqdn = "$SqlServerName.database.windows.net"
-$jdbc = "jdbc:sqlserver://$serverFqdn"+":1433;databaseName=$DbName;encrypt=true;trustServerCertificate=false;loginTimeout=30"
+$jdbc = "jdbc:sqlserver://$serverFqdn"+":1433;database=$DbName;user=$AdminUser@$SqlServerName;password=$AdminPass;encrypt=true;trustServerCertificate=false;loginTimeout=30;"
 
-# Bloco pronto para o Spring Boot
-$springBlock = @"
-spring.datasource.url=$jdbc
-spring.datasource.username=$AdminUser
-spring.datasource.password=$AdminPass
-spring.datasource.driver-class-name=com.microsoft.sqlserver.jdbc.SQLServerDriver
-"@
+Write-Host "==> Definindo variáveis de ambiente"
+# Define variáveis de ambiente
+$env:SPRING_DATASOURCE_URL = $jdbc
+$env:SPRING_DATASOURCE_USERNAME = $AdminUser
+$env:SPRING_DATASOURCE_PASSWORD = $AdminPass
+$env:SPRING_DATASOURCE_DRIVER_CLASS_NAME = "com.microsoft.sqlserver.jdbc.SQLServerDriver"
 
-Write-Host "`n===== SAÍDA ====="
-Write-Host "Server FQDN : $serverFqdn"
-Write-Host "Database    : $DbName"
-Write-Host "Username    : $AdminUser"   
-Write-Host "JDBC        : $jdbc"
-Write-Host "`nAgora rode os seguintes comandos nesta janela do PowerShell para exportar as variáveis de ambiente:"
-Write-Host ""
-Write-Host "`$env:SPRING_DATASOURCE_URL = `"$jdbc`""
-Write-Host "`$env:SPRING_DATASOURCE_USERNAME = `"$AdminUser`""
-Write-Host "`$env:SPRING_DATASOURCE_PASSWORD = `"$AdminPass`""
-Write-Host "`$env:SPRING_DATASOURCE_DRIVER_CLASS_NAME = `"com.microsoft.sqlserver.jdbc.SQLServerDriver`""
-Write-Host ""
-Write-Host "Depois rode sua aplicação com: mvn spring-boot:run"
+az provider register --namespace Microsoft.Web
 
+Write-Host "==> criando o plano do serviço de aplicativo"
+az appservice plan create -g $ResourceGroup -n $Plan -l $Location --sku B1 --is-linux
 
+Write-Host "==> Criando o serviço de aplicativo"
+az webapp create -g $ResourceGroup -p $Plan -n trackyard-2TDSB --runtime "JAVA:17-java17"
 
+Write-Host "==> Gerando o .jar"
+cd ..
+mvn -q -DskipTests package
+
+Write-Host "==> Definindo configurações do WebApp"
+az webapp config appsettings set -g $ResourceGroup -n trackyard-2TDSB --settings `
+  SPRING_DATASOURCE_URL=$jdbc `
+  SPRING_DATASOURCE_USERNAME=$AdminUser `
+  SPRING_DATASOURCE_PASSWORD=$AdminPass `
+  SPRING_DATASOURCE_DRIVER_CLASS_NAME="com.microsoft.sqlserver.jdbc.SQLServerDriver"
+
+Write-Host "==> realizando deploy do WebApp"
+az webapp deploy -g $ResourceGroup -n trackyard-2TDSB --src-path target/trackyard-0.0.1-SNAPSHOT.jar --type jar
+
+Write-Host "==> Acesse: trackyard-2tdsb.azurewebsites.net/motos"
