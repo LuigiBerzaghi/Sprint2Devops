@@ -1,9 +1,15 @@
-# TrackYard - Challenge 2025
+# TrackYard - Sistema de Gerenciamento de Pátios
 
-O **TrackYard** é uma aplicação web para gestão de pátios de veículos.  
-Ela permite **cadastrar, consultar, atualizar e remover** informações de motos, pátios e movimentações, com persistência em banco de dados na nuvem.
+**TrackYard** é uma aplicação Java desenvolvida para apoiar a Mottu no gerenciamento de motos dentro dos pátios, evitando perdas inesperadas e melhorando a rastreabilidade.
 
----
+## 🎯 Descrição da Solução
+O sistema permite o **cadastro e controle de pátios, pontos de leitura, motos e movimentações**. A aplicação está hospedada na **Azure App Service** e utiliza **Azure SQL Database** como banco em nuvem.  
+
+## 💡 Benefícios para o Negócio
+- **Redução de perdas**: acompanhamento em tempo real da localização das motos.  
+- **Agilidade**: controle de entradas e saídas via pontos de leitura.  
+- **Escalabilidade**: arquitetura em nuvem, fácil de expandir.  
+- **Visibilidade**: relatórios claros de movimentações e histórico por moto.  
 
 ## 🚀 Pré-requisitos
 
@@ -32,6 +38,30 @@ Para acessar a aplicação, basta entrar no link:
 
 ---
 
+## 🧪 Exemplos de testes para demonstração do CRUD via http
+
+### Inserir Moto
+```bash
+curl -X POST https://<seuapp>.azurewebsites.net/api/motos   -H "Content-Type: application/json"   -d '{"modelo":"Mottu Sport 110i","placa":"CBA-0011"}'
+```
+
+### Consultar Motos
+```bash
+curl https://<seuapp>.azurewebsites.net/api/motos
+```
+
+### Atualizar Moto
+```bash
+curl -X PUT https://<seuapp>.azurewebsites.net/api/motos/MOTO001   -H "Content-Type: application/json"   -d '{"modelo":"Mottu Cargo 125","placa":"CBA-7777"}'
+```
+
+### Deletar Moto
+```bash
+curl -X DELETE https://<seuapp>.azurewebsites.net/api/motos/MOTO001
+```
+
+---
+
 ## ⏹️ Ao parar a execução
 Desfaz o grupo de recursos:
 ```powershell
@@ -47,6 +77,17 @@ az group delete --name rg-trackyard --yes --no-wait
 | `SPRING_DATASOURCE_USERNAME`             | Usuário do banco                |
 | `SPRING_DATASOURCE_PASSWORD`             | Senha do banco                  |
 | `SPRING_DATASOURCE_DRIVER_CLASS_NAME`    | Driver JDBC                     |
+
+---
+
+## 🗄️ Estrutura do Projeto
+- `controller/` → controladores REST  
+- `service/` → regras de negócio  
+- `entity/` → entidades JPA  
+- `repository/` → repositórios JPA  
+- `dto/` → objetos de transferência  
+- `exception/` → tratamento centralizado de erros  
+- `scripts/` → scripts Azure CLI + DDL (`script_bd.sql`) 
 
 ---
 
