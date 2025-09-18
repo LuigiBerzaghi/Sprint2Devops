@@ -44,7 +44,7 @@ Para acessar a aplicação, basta entrar no link:
 Ao abrir o app no link retornado após a execução do deploy, o usuário pode testar o CRUD de todas as entidades através da própria interface gráfica do WebApp.
 
 ### Front-end
-📂 [Baixar Collection do Postman](Postman/TrackYardAPI.postman_collection.json)
+📂 [Baixar Collection do Postman](Postman/TrackYardAPI.postman_collection.json?raw=true)
 
 ---
 
