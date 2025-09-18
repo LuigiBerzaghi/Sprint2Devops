@@ -34,7 +34,7 @@ cd Sprint2Devops/trackyard/scripts
 
 ## 🛠️ Rodando a aplicação
 Para acessar a aplicação, basta entrar no link:
-[Trackyard](trackyard-2tdsb.azurewebsites.net/motos)
+[Trackyard](https://trackyard-2tdsb.azurewebsites.net/motos)
 
 ---
 
