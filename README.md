@@ -21,7 +21,7 @@ O sistema permite o **cadastro e controle de pátios, pontos de leitura, motos e
 ---
 
 
-## ⚙️ Provisionamento do Banco (Azure SQL)
+## ⚙️ Provisionamento geral da aplicação
 
 Execute o script PowerShell para criar o **Resource Group**, **Servidor SQL**, **Database** e realizar o **Deploy** da aplicação:
 
