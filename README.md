@@ -23,12 +23,38 @@ O sistema permite o **cadastro e controle de pátios, pontos de leitura, motos e
 
 ## ⚙️ Provisionamento geral da aplicação
 
-Execute o script PowerShell para criar o **Resource Group**, **Servidor SQL**, **Database** e realizar o **Deploy** da aplicação:
+Execute o script PowerShell para criar o **Resource Group**, **Servidor SQL**, **Database** e realizar o **Deploy** da aplicação.
+
+Caso queira personalizar apenas usuário e senha:
 
 ```powershell
-cd Sprint2Devops/trackyard/scripts
-.\provision-sql.ps1 -AdminPass "<senha>"
+.\provision-sql.ps1 `
+  -AdminUser <usuario-admin> `
+  -AdminPass <senha-admin>
 ```
+
+Caso queira personalizar demais parãmetros utilizado pelo script:
+
+```powershell
+.\provision-sql.ps1 `
+  -Location <localizacao> `
+  -ResourceGroup <nome-do-resource-group> `
+  -SqlServerName <nome-unico-do-sql-server> `
+  -DbName <nome-do-database> `
+  -AdminUser <usuario-admin> `
+  -AdminPass <senha-admin> `
+  -Plan <nome-do-app-service-plan>
+
+```
+
+Valores padrão definidos pelo script:
+-  Location = "brazilsouth"
+-  ResourceGroup = "rg-trackyard"
+-  SqlServerName = "sqltrackyard"         
+-  DbName = "dbtrackyard"              
+-  AdminUser = "adminuser"
+-  AdminPass = "SenhaSuperSegura123!"
+-  Plan = "planTrackyard"
 
 ---
 
@@ -61,7 +87,7 @@ Para utilizar, basta:
 ---
 
 ## ⏹️ Ao parar a execução
-Desfaz o grupo de recursos:
+Desfaz o grupo de recursos padrão:
 ```powershell
 az group delete --name rg-trackyard --yes --no-wait
 ```
