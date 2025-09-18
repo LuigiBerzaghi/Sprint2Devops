@@ -38,27 +38,12 @@ Para acessar a aplicação, basta entrar no link:
 
 ---
 
-## 🧪 Exemplos de testes para demonstração do CRUD via http
+## 🧪 Exemplos de testes para demonstração do CRUD via https
 
-### Inserir Moto
-```bash
-curl -X POST https://<seuapp>.azurewebsites.net/api/motos   -H "Content-Type: application/json"   -d '{"modelo":"Mottu Sport 110i","placa":"CBA-0011"}'
-```
+### Front-end
+Ao abrir o app no link retornado após a execução do deploy, o usuário pode testar o CRUD de todas as entidades através da própria interface gráfica do WebApp.
 
-### Consultar Motos
-```bash
-curl https://<seuapp>.azurewebsites.net/api/motos
-```
-
-### Atualizar Moto
-```bash
-curl -X PUT https://<seuapp>.azurewebsites.net/api/motos/MOTO001   -H "Content-Type: application/json"   -d '{"modelo":"Mottu Cargo 125","placa":"CBA-7777"}'
-```
-
-### Deletar Moto
-```bash
-curl -X DELETE https://<seuapp>.azurewebsites.net/api/motos/MOTO001
-```
+### Front-end
 
 ---
 
