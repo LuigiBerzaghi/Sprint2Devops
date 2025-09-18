@@ -53,7 +53,7 @@ Dependendo do nome definido para a aplicação pelo usuário, pode ser necessár
 Para utilizar, basta:
 - Acessar [Postman](https://www.postman.com/)
 - Realizar login
-- Exportar o arquivo "TrackYardAPI.postman_collection.json"
+- Importar o arquivo "TrackYardAPI.postman_collection.json"
 - Utilizar a coleção de acordo com as necessidades do usuário
 
 📂 [Baixar Collection do Postman](Postman/TrackYardAPI.postman_collection.json)
