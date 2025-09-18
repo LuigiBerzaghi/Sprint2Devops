@@ -43,6 +43,8 @@ Para acessar a aplicação, basta entrar no link:
 ### Front-end
 Ao abrir o app no link retornado após a execução do deploy, o usuário pode testar o CRUD de todas as entidades através da própria interface gráfica do WebApp.
 
+---
+
 ### Postman
 Abaixo, há uma coleção pronta para testes da API Trackyard via Postman.
 
