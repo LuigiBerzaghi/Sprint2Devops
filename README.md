@@ -65,6 +65,10 @@ Desfaz o grupo de recursos:
 ```powershell
 az group delete --name rg-trackyard --yes --no-wait
 ```
+Caso tenha personalizado o nome do grupo de recursos:
+```powershell
+az group delete --name <nome-rg> --yes --no-wait
+```
 ---
 
 ## 🔑 Variáveis de ambiente utilizadas
