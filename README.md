@@ -19,11 +19,24 @@ O sistema permite o **cadastro e controle de pátios, pontos de leitura, motos e
 - Conta no [GitHub](https://github.com/)
 - É necessário estar logado na Azure para o funcionamento dos scripts
 ---
+##⚙️ Baixando a aplicação
 
+Para baixar o conteúdo da aplicação, basta executar o seguinte comando no terminal com o diretório desejado:
 
+```powershell
+git clone https://github.com/LuigiBerzaghi/Sprint2Devops.git
+```
+
+---
 ## ⚙️ Provisionamento geral da aplicação
 
-Execute o script PowerShell para criar o **Resource Group**, **Servidor SQL**, **Database** e realizar o **Deploy** da aplicação.
+Após "clonar" o repositório, execute o seguinte comando para ir ao diretório correto:
+
+```powershell
+cd Sprint2Devops/trackyard/scripts
+```
+
+Agora, execute o script PowerShell para criar o **Resource Group**, **Servidor SQL**, **Database** e realizar o **Deploy** da aplicação.
 
 Caso queira personalizar apenas usuário e senha:
 
