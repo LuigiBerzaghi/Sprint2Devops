@@ -134,7 +134,7 @@ az group delete --name <nome-rg> --yes --no-wait
 - `repository/` → repositórios JPA  
 - `dto/` → objetos de transferência  
 - `exception/` → tratamento centralizado de erros  
-- `scripts/` → scripts Azure CLI + DDL (`script_bd.sql`) 
+- `scripts/` → scripts Azure CLI + DDL (`script_bd.sql`) -> que foi ignorado tendo em vista que o Spring Boot tem a mesma função
 
 ---
 
