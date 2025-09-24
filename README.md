@@ -140,6 +140,6 @@ az group delete --name <nome-rg> --yes --no-wait
 
 ## 👥 Equipe
 
-- RMXXXXX - Luigi Berzaghi  
-- RMXXXXX - Guilherme Pelissari   
-- RMXXXXX - Cauã dos Santos   
+- RM555516 - Luigi Berzaghi  
+- RM559093 - Guilherme Pelissari   
+- RM558445 - Cauã dos Santos   
