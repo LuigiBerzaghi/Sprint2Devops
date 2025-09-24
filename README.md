@@ -60,6 +60,12 @@ Caso queira personalizar demais parãmetros utilizado pelo script:
 
 ```
 
+Caso queira usar valores padrões:
+
+```powershell
+.\provision-sql.ps1
+```
+
 Valores padrão definidos pelo script:
 -  Location = "brazilsouth"
 -  ResourceGroup = "rg-trackyard"
