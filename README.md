@@ -18,7 +18,9 @@ O sistema permite o **cadastro e controle de pátios, pontos de leitura, motos e
 - [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli) (para provisionar recursos no Azure)  
 - Conta no [GitHub](https://github.com/)
 - É necessário estar logado na Azure para o funcionamento dos scripts
+  
 ---
+
 ##⚙️ Baixando a aplicação
 
 Para baixar o conteúdo da aplicação, basta executar o seguinte comando no terminal com o diretório desejado:
