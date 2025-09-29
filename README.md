@@ -83,7 +83,7 @@ Para acessar a aplicação, basta entrar no link:
 
 ---
 
-## 🧪 Exemplos de testes para demonstração do CRUD via https
+## 🧪 CRUD via https
 
 ### Front-end
 Ao abrir o app no link retornado após a execução do deploy, o usuário pode testar o CRUD de todas as entidades através da própria interface gráfica do WebApp.
