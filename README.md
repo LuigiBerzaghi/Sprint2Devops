@@ -21,7 +21,7 @@ O sistema permite o **cadastro e controle de pátios, pontos de leitura, motos e
   
 ---
 
-##⚙️ Baixando a aplicação
+## ⚙️ Baixando a aplicação
 
 Para baixar o conteúdo da aplicação, basta executar o seguinte comando no terminal com o diretório desejado:
 
