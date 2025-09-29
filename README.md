@@ -90,21 +90,6 @@ Ao abrir o app no link retornado após a execução do deploy, o usuário pode t
 
 ---
 
-### Postman
-Abaixo, há uma coleção pronta para testes da API Trackyard via Postman.
-
-Dependendo do nome definido para a aplicação pelo usuário, pode ser necessário alterar o nome da aplicação na url, portanto, é importante se atentar a este fato.
-
-Para utilizar, basta:
-- Acessar [Postman](https://www.postman.com/)
-- Realizar login
-- Importar o arquivo "TrackYardAPI.postman_collection.json"
-- Utilizar a coleção de acordo com as necessidades do usuário
-
-📂 [Baixar Collection do Postman](Postman/TrackYardAPI.postman_collection.json)
-
----
-
 ## ⏹️ Ao parar a execução
 Desfaz o grupo de recursos padrão:
 ```powershell
