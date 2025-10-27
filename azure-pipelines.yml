@@ -1,3 +1,4 @@
+
 # Azure Pipelines para Trackyard
 # Objetivo: CI (build/test/package + build/push Docker) e CD (deploy no Azure Web App usando a mesma imagem)
 
