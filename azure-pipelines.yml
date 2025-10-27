@@ -17,7 +17,7 @@ variables:
     value: 'trackyard-2TDSB'
   # Nome do Azure Container Registry (sem domínio) (de provision-sql.ps1)
   - name: ACR_NAME
-    value: 'acrTrackyard'
+    value: 'acrtrackyard '
   # Imagem do agente
   - name: vmImage
     value: 'ubuntu-latest'
@@ -25,7 +25,7 @@ variables:
   - group: trackyard-secrets
   # Observações sobre Service Connections utilizadas:
   - name: dockerRegistryServiceConnection
-    value: 'acrTrackyard'
+    value: 'acrtrackyard '
   - name: azureSubscription
     value: 'azureTrackyard'
 
@@ -60,7 +60,7 @@ stages:
             displayName: 'Docker buildAndPush -> ACR (latest + commit hash)'
             inputs:
               command: 'buildAndPush'
-              containerRegistry: 'acrTrackyard' # Service Connection para o ACR
+              containerRegistry: 'acrtrackyard ' # Service Connection para o ACR
               repository: 'trackyard'           # Repositório no ACR (acrname.azurecr.io/trackyard)
               Dockerfile: 'trackyard/Dockerfile'
               buildContext: 'trackyard'
