@@ -7,17 +7,16 @@ Param(
   [string]$AdminPass = "SenhaSuperSegura123!",
   [switch]$AllowAzureServices = $true,
   [switch]$AllowClientIP = $true,
-  [string]$Plan = "planTrackyard"
+  [string]$Plan = "planTrackyard",
+  # Parâmetros para Web App em contêiner (ACR)
+  [string]$WebAppName = "trackyard-2TDSB",
+  [string]$AcrName = "acrtrackyard",
+  [string]$ImageRepo = "trackyard",
+  [string]$ImageTag = "latest"
 )
 
-<# Container único (ACR): defaults. Ajuste conforme necessário #>
-$AcrName = "acrtrackyard"
-$AcrRepo = "trackyard"
-$ImageTag = "latest"
-$WebAppName = "trackyard-2TDSB"
-
-Write-Host "==> Criando Resource Group $ResourceGroup em $Location"
-az group create -n $ResourceGroup -l $Location -o none
+Write-Host "==> Criando Resource Group $ResourceGroup em $Location "
+az group create -n $ResourceGroup -l $Location | Out-Null
 
 Write-Host "==> Criando SQL Server $SqlServerName "
 az sql server create `
@@ -25,7 +24,7 @@ az sql server create `
   -n $SqlServerName `
   -u $AdminUser `
   -p $AdminPass `
-  -l $Location -o none
+  -l $Location | Out-Null
 
 Write-Host "==> Criando Database $DbName "
 az sql db create `
@@ -33,7 +32,7 @@ az sql db create `
   -s $SqlServerName `
   -n $DbName `
   --service-objective S0 `
-  --backup-storage-redundancy Local -o none
+  --backup-storage-redundancy Local | Out-Null
 
 if ($AllowAzureServices) {
   Write-Host "==> Liberando Azure Services (0.0.0.0)"
@@ -41,7 +40,7 @@ if ($AllowAzureServices) {
     -g $ResourceGroup -s $SqlServerName `
     -n AllowAzureServices `
     --start-ip-address 0.0.0.0 `
-    --end-ip-address 0.0.0.0 -o none
+    --end-ip-address 0.0.0.0 | Out-Null
 }
 
 if ($AllowClientIP) {
@@ -51,7 +50,7 @@ if ($AllowClientIP) {
     -g $ResourceGroup -s $SqlServerName `
     -n AllowMyIP `
     --start-ip-address $ip `
-    --end-ip-address $ip -o none
+    --end-ip-address $ip | Out-Null
 }
 
 # Monta JDBC 
@@ -65,31 +64,23 @@ $env:SPRING_DATASOURCE_USERNAME = $AdminUser
 $env:SPRING_DATASOURCE_PASSWORD = $AdminPass
 $env:SPRING_DATASOURCE_DRIVER_CLASS_NAME = "com.microsoft.sqlserver.jdbc.SQLServerDriver"
 
-az provider register --namespace Microsoft.Web -o none
+az provider register --namespace Microsoft.Web
 
 Write-Host "==> criando o plano do serviço de aplicativo"
-az appservice plan create -g $ResourceGroup -n $Plan -l $Location --sku B1 --is-linux -o none
+az appservice plan create -g $ResourceGroup -n $Plan -l $Location --sku B1 --is-linux
 
 Write-Host "==> Criando o serviço de aplicativo"
-$AcrLoginServer = (az acr show -n $AcrName --query loginServer -o tsv)
-$acrCreds = az acr credential show -n $AcrName | ConvertFrom-Json
-$acrUser = $acrCreds.username
-$acrPass = ($acrCreds.passwords | Where-Object { $_.name -eq 'password' } | Select-Object -First 1 -ExpandProperty value)
-$imageRef = "$AcrLoginServer/$AcrRepo:$ImageTag"
+# Resolver login server do ACR e imagem completa
+$acrLoginServer = az acr show -n $AcrName --query loginServer -o tsv
+$imageRef = "$acrLoginServer"+"/$ImageRepo"+":$ImageTag"
 
-az webapp create -g $ResourceGroup -p $Plan -n $WebAppName -i $imageRef -o none
+# Criar Web App com imagem única (-i)
+az webapp create -g $ResourceGroup -p $Plan -n $WebAppName -i $imageRef
 
-az webapp config container set `
-  -g $ResourceGroup -n $WebAppName `
-  --docker-custom-image-name $imageRef `
-  --docker-registry-server-url "https://$AcrLoginServer" `
-  --docker-registry-server-user $acrUser `
-  --docker-registry-server-password $acrPass `
-  -o none
-
-Write-Host "==> Preparando configurações do WebApp (container)"
-# cd .. (não necessário para container)
-# mvn -q -DskipTests package (deploy via imagem container)
+Write-Host "==> Configurando contêiner com credenciais do ACR"
+$acrUser = az acr credential show -n $AcrName --query username -o tsv
+$acrPass = az acr credential show -n $AcrName --query passwords[0].value -o tsv
+az webapp config container set -g $ResourceGroup -n $WebAppName -i $imageRef -r $acrLoginServer -u $acrUser -p $acrPass | Out-Null
 
 Write-Host "==> Definindo configurações do WebApp"
 az webapp config appsettings set -g $ResourceGroup -n $WebAppName --settings `
@@ -97,9 +88,8 @@ az webapp config appsettings set -g $ResourceGroup -n $WebAppName --settings `
   SPRING_DATASOURCE_USERNAME=$AdminUser `
   SPRING_DATASOURCE_PASSWORD=$AdminPass `
   SPRING_DATASOURCE_DRIVER_CLASS_NAME="com.microsoft.sqlserver.jdbc.SQLServerDriver" `
-  -o none
+  WEBSITES_PORT=8080
 
-# Write-Host "==> realizando deploy do WebApp" (não aplicável para container)
-# az webapp deploy -g $ResourceGroup -n $WebAppName --src-path target/trackyard-0.0.1-SNAPSHOT.jar --type jar
+# Deploy via container image configured acima (sem deploy JAR)
 
 Write-Host "==> Acesse: https://$WebAppName.azurewebsites.net/motos"

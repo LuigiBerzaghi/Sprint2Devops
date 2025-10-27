@@ -1,9 +1,11 @@
+
 # Azure Pipelines para Trackyard
 # Objetivo: CI (build/test/package + build/push Docker) e CD (deploy no Azure Web App usando a mesma imagem)
 
 # Dispara pipeline em push na branch main
 trigger:
 - main
+- sprint4
 
 # Variáveis globais (ajuste conforme seu ambiente)
 variables:
@@ -15,16 +17,17 @@ variables:
     value: 'trackyard-2TDSB'
   # Nome do Azure Container Registry (sem domínio) (de provision-sql.ps1)
   - name: ACR_NAME
-    value: 'acrtrackyard'
+    value: 'acrtrackyard '
   # Imagem do agente
   - name: vmImage
     value: 'ubuntu-latest'
   # Opcional: grupo de variáveis para secrets (ACR_USERNAME, ACR_PASSWORD)
-  # - group: trackyard-secrets
-
-# Observações sobre Service Connections utilizadas:
-# - Docker Registry para ACR: 'acrTrackyard' (altere se necessário)
-# - Azure Resource Manager: 'azureTrackyard'
+  - group: trackyard-secrets
+  # Observações sobre Service Connections utilizadas:
+  - name: dockerRegistryServiceConnection
+    value: 'acrtrackyard '
+  - name: azureSubscription
+    value: 'azureTrackyard'
 
 stages:
   # =============================
@@ -57,7 +60,7 @@ stages:
             displayName: 'Docker buildAndPush -> ACR (latest + commit hash)'
             inputs:
               command: 'buildAndPush'
-              containerRegistry: 'acrTrackyard' # Service Connection para o ACR
+              containerRegistry: 'acrtrackyard ' # Service Connection para o ACR
               repository: 'trackyard'           # Repositório no ACR (acrname.azurecr.io/trackyard)
               Dockerfile: 'trackyard/Dockerfile'
               buildContext: 'trackyard'
