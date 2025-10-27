@@ -17,7 +17,7 @@ variables:
     value: 'trackyard-2TDSB'
   # Nome do Azure Container Registry (sem domínio) (de provision-sql.ps1)
   - name: ACR_NAME
-    value: 'acrtrackyard'
+    value: 'acrTrackyard'
   # Imagem do agente
   - name: vmImage
     value: 'ubuntu-latest'
