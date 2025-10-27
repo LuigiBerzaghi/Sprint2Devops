@@ -21,11 +21,12 @@ variables:
   - name: vmImage
     value: 'ubuntu-latest'
   # Opcional: grupo de variáveis para secrets (ACR_USERNAME, ACR_PASSWORD)
-  # - group: trackyard-secrets
-
-# Observações sobre Service Connections utilizadas:
-# - Docker Registry para ACR: 'acrTrackyard' (altere se necessário)
-# - Azure Resource Manager: 'azureTrackyard'
+  - group: trackyard-secrets
+  # Observações sobre Service Connections utilizadas:
+  - name: dockerRegistryServiceConnection
+    value: 'acrTrackyard'
+  - name: azureSubscription
+    value: 'azureTrackyard'
 
 stages:
   # =============================
