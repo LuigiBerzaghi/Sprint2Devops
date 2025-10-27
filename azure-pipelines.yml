@@ -19,7 +19,7 @@ variables:
     value: 'acrtrackyard'
   # Imagem do agente
   - name: vmImage
-    value: 'ubuntu-latest'
+    value: Default
   # Opcional: grupo de variáveis para secrets (ACR_USERNAME, ACR_PASSWORD)
   # - group: trackyard-secrets
 
