@@ -4,6 +4,7 @@
 # Dispara pipeline em push na branch main
 trigger:
 - main
+- sprint4
 
 # Variáveis globais (ajuste conforme seu ambiente)
 variables:
