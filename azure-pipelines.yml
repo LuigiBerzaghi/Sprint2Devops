@@ -1,0 +1,117 @@
+# Azure Pipelines para Trackyard
+# Objetivo: CI (build/test/package + build/push Docker) e CD (deploy no Azure Web App usando a mesma imagem)
+
+# Dispara pipeline em push na branch main
+trigger:
+- main
+
+# Variáveis globais (ajuste conforme seu ambiente)
+variables:
+  # Nome do Resource Group onde o Web App está (de provision-sql.ps1)
+  - name: RG_NAME
+    value: 'rg-trackyard'
+  # Nome do Azure Web App (Linux, Container) (de provision-sql.ps1)
+  - name: APP_NAME
+    value: 'trackyard-2TDSB'
+  # Nome do Azure Container Registry (sem domínio) (de provision-sql.ps1)
+  - name: ACR_NAME
+    value: 'acrtrackyard'
+  # Imagem do agente
+  - name: vmImage
+    value: 'ubuntu-latest'
+  # Opcional: grupo de variáveis para secrets (ACR_USERNAME, ACR_PASSWORD)
+  # - group: trackyard-secrets
+
+# Observações sobre Service Connections utilizadas:
+# - Docker Registry para ACR: 'acrTrackyard' (altere se necessário)
+# - Azure Resource Manager: 'azureTrackyard'
+
+stages:
+  # =============================
+  # CI: Build/Test e Imagem Docker
+  # =============================
+  - stage: CI
+    displayName: 'CI - Build, Test e Imagem'
+    jobs:
+      - job: Build
+        displayName: 'Build Java e Push da Imagem no ACR'
+        pool:
+          vmImage: $(vmImage)
+        steps:
+          # Checkout do repositório
+          - checkout: self
+            persistCredentials: false
+
+          # Maven: clean, test e package
+          - task: Maven@3
+            displayName: 'Maven clean test package'
+            inputs:
+              # Ajuste o caminho do pom.xml se necessário
+              mavenPomFile: 'trackyard/pom.xml'
+              goals: 'clean test package'
+              publishJUnitResults: true
+              testResultsFiles: '**/surefire-reports/TEST-*.xml'
+
+          # Docker: build e push da imagem para o ACR com tags "latest" e hash do commit
+          - task: Docker@2
+            displayName: 'Docker buildAndPush -> ACR (latest + commit hash)'
+            inputs:
+              command: 'buildAndPush'
+              containerRegistry: 'acrTrackyard' # Service Connection para o ACR
+              repository: 'trackyard'           # Repositório no ACR (acrname.azurecr.io/trackyard)
+              Dockerfile: 'trackyard/Dockerfile'
+              buildContext: 'trackyard'
+              tags: |
+                $(Build.SourceVersion)
+                latest
+
+          # Publicação opcional do artefato (ex.: .jar gerado)
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publicar artefato opcional (.jar)'
+            condition: succeeded()
+            inputs:
+              PathtoPublish: 'trackyard/target'
+              ArtifactName: 'java_package'
+              publishLocation: 'Container'
+
+  # =============================================
+  # CD: Deploy configurando o Web App (Container)
+  # =============================================
+  - stage: CD
+    displayName: 'CD - Deploy para Azure Web App (Container)'
+    dependsOn: CI
+    condition: succeeded()
+    jobs:
+      - job: Deploy
+        displayName: 'Configurar Web App para usar a imagem do commit'
+        pool:
+          vmImage: $(vmImage)
+        steps:
+          # Azure CLI: aponta o Web App para a imagem do ACR com tag do commit
+          - task: AzureCLI@2
+            displayName: 'az webapp config container set (imagem do commit)'
+            inputs:
+              azureSubscription: 'azureTrackyard' # Service Connection ARM
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                set -euo pipefail
+
+                IMAGE_TAG="$(Build.SourceVersion)"
+                IMAGE_NAME="$(ACR_NAME).azurecr.io/trackyard:${IMAGE_TAG}"
+
+                echo "Definindo Web App $(APP_NAME) para imagem ${IMAGE_NAME}"
+
+                az webapp config container set \
+                  --resource-group "$(RG_NAME)" \
+                  --name "$(APP_NAME)" \
+                  --docker-custom-image-name "${IMAGE_NAME}" \
+                  --docker-registry-server-url "https://$(ACR_NAME).azurecr.io" \
+                  --docker-registry-server-user "$(ACR_USERNAME)" \
+                  --docker-registry-server-password "$(ACR_PASSWORD)"
+
+            # Notas:
+            # - Configure as variáveis secretas 'ACR_USERNAME' e 'ACR_PASSWORD' via Variable Group
+            #   ou variáveis protegidas no pipeline. Não as versione no repositório.
+            # - Caso use Managed Identity com permissão AcrPull no ACR, você pode omitir user/password
+            #   e usar apenas a imagem e a URL do registry (ou configurar via 'az webapp identity assign').
