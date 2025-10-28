@@ -49,7 +49,6 @@ stages:
           - task: Maven@3
             displayName: 'Maven clean test package'
             inputs:
-              # Ajuste o caminho do pom.xml se necessário
               mavenPomFile: 'trackyard/pom.xml'
               goals: 'clean test package'
               publishJUnitResults: true
