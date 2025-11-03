@@ -17,7 +17,7 @@ variables:
     value: 'trackyard-2TDSB'
   # Nome do Azure Container Registry (sem domínio) (de provision-sql.ps1)
   - name: ACR_NAME
-    value: 'acrtrackyard '
+    value: 'acrtrackyard'
   # Imagem do agente
   - name: vmImage
     value: 'ubuntu-latest'
@@ -25,7 +25,7 @@ variables:
   - group: trackyard-secrets
   # Observações sobre Service Connections utilizadas:
   - name: dockerRegistryServiceConnection
-    value: 'acrtrackyard '
+    value: 'acrtrackyard'
   - name: azureSubscription
     value: 'azureTrackyard'
 
@@ -39,7 +39,7 @@ stages:
       - job: Build
         displayName: 'Build Java e Push da Imagem no ACR'
         pool:
-          vmImage: $(vmImage)
+          name: 'Default'
         steps:
           # Checkout do repositório
           - checkout: self
