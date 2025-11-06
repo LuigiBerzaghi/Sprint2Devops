@@ -86,7 +86,7 @@ Para realizar os testes na api, testar os endpoints com a coleção do Postman, 
 
 ---
 
-## Acessar o Banco H2 (opicional)
+## Acessar o Banco Azure (opicional)
 
 O projeto usa o banco de dados em nuvem Azure.
 
