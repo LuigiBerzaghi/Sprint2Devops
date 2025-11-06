@@ -14,6 +14,12 @@ variables:
     value: 'acrtrackyard'
   - name: vmImage
     value: 'ubuntu-latest'
+  - name: SQL_SERVER_NAME
+    value: 'sqltrackyard'
+  - name: SQL_DB_NAME
+    value: 'dbtrackyard'
+  - name: SQL_ADMIN_USER
+    value: 'adminuser'
   - name: dockerRegistryServiceConnection
     value: 'acrTrackyard'
   - name: azureSubscription
@@ -31,6 +37,17 @@ stages:
           - checkout: self
             persistCredentials: false
 
+          - script: |
+              set -euo pipefail
+              jdbc="jdbc:sqlserver://$(SQL_SERVER_NAME).database.windows.net:1433;database=$(SQL_DB_NAME);user=$(SQL_ADMIN_USER)@$(SQL_SERVER_NAME);password=$(SQL_ADMIN_PASSWORD);encrypt=true;trustServerCertificate=false;loginTimeout=30;"
+              echo "##vso[task.setvariable variable=SPRING_DATASOURCE_URL;issecret=true]$jdbc"
+              echo "##vso[task.setvariable variable=SPRING_DATASOURCE_USERNAME]$(SQL_ADMIN_USER)"
+              echo "##vso[task.setvariable variable=SPRING_DATASOURCE_PASSWORD;issecret=true]$(SQL_ADMIN_PASSWORD)"
+              echo "##vso[task.setvariable variable=SPRING_DATASOURCE_DRIVER_CLASS_NAME]com.microsoft.sqlserver.jdbc.SQLServerDriver"
+            displayName: 'Definir variaveis de conexao com Azure SQL'
+            env:
+              SQL_ADMIN_PASSWORD: $(SQL_ADMIN_PASSWORD)
+
           - task: Maven@3
             displayName: 'Maven clean test package'
             inputs:
@@ -38,6 +55,11 @@ stages:
               goals: 'clean test package'
               publishJUnitResults: true
               testResultsFiles: '**/surefire-reports/TEST-*.xml'
+            env:
+              SPRING_DATASOURCE_URL: $(SPRING_DATASOURCE_URL)
+              SPRING_DATASOURCE_USERNAME: $(SPRING_DATASOURCE_USERNAME)
+              SPRING_DATASOURCE_PASSWORD: $(SPRING_DATASOURCE_PASSWORD)
+              SPRING_DATASOURCE_DRIVER_CLASS_NAME: $(SPRING_DATASOURCE_DRIVER_CLASS_NAME)
 
           - task: Docker@2
             displayName: 'Docker buildAndPush -> ACR (latest + commit hash)'
