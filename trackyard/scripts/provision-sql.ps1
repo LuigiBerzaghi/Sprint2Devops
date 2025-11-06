@@ -1,13 +1,18 @@
 Param(
   [string]$Location = "brazilsouth",
   [string]$ResourceGroup = "rg-trackyard",
-  [string]$SqlServerName = "sqltrackyard",         # precisa ser único na Azure
-  [string]$DbName = "dbtrackyard",                 #valores usados caso o usuário não digite nada
+  [string]$SqlServerName = "sqltrackyard",         # precisa ser ÃƒÆ’Ã‚Âºnico na Azure
+  [string]$DbName = "dbtrackyard",                 #valores usados caso o usuÃƒÆ’Ã‚Â¡rio nÃƒÆ’Ã‚Â£o digite nada
   [string]$AdminUser = "adminuser",
   [string]$AdminPass = "SenhaSuperSegura123!",
   [switch]$AllowAzureServices = $true,
   [switch]$AllowClientIP = $true,
-  [string]$Plan = "planTrackyard"
+  [string]$Plan = "planTrackyard",
+  # ParÃƒÆ’Ã‚Â¢metros para Web App em contÃƒÆ’Ã‚Âªiner (ACR)
+  [string]$WebAppName = "trackyard-2TDSB",
+  [string]$AcrName = "acrtrackyard",
+  [string]$ImageRepo = "trackyard",
+  [string]$ImageTag = "latest"
 )
 
 Write-Host "==> Criando Resource Group $ResourceGroup em $Location "
@@ -40,7 +45,7 @@ if ($AllowAzureServices) {
 
 if ($AllowClientIP) {
   $ip = (Invoke-RestMethod -Uri "https://api.ipify.org?format=text" -TimeoutSec 10)
-  Write-Host "==> Liberando IP do cliente: $ip …"
+  Write-Host "==> Liberando IP do cliente: $ip ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦"
   az sql server firewall-rule create `
     -g $ResourceGroup -s $SqlServerName `
     -n AllowMyIP `
@@ -52,8 +57,8 @@ if ($AllowClientIP) {
 $serverFqdn = "$SqlServerName.database.windows.net"
 $jdbc = "jdbc:sqlserver://$serverFqdn"+":1433;database=$DbName;user=$AdminUser@$SqlServerName;password=$AdminPass;encrypt=true;trustServerCertificate=false;loginTimeout=30;"
 
-Write-Host "==> Definindo variáveis de ambiente"
-# Define variáveis de ambiente
+Write-Host "==> Definindo variÃƒÆ’Ã‚Â¡veis de ambiente"
+# Define variÃƒÆ’Ã‚Â¡veis de ambiente
 $env:SPRING_DATASOURCE_URL = $jdbc
 $env:SPRING_DATASOURCE_USERNAME = $AdminUser
 $env:SPRING_DATASOURCE_PASSWORD = $AdminPass
@@ -61,24 +66,56 @@ $env:SPRING_DATASOURCE_DRIVER_CLASS_NAME = "com.microsoft.sqlserver.jdbc.SQLServ
 
 az provider register --namespace Microsoft.Web
 
-Write-Host "==> criando o plano do serviço de aplicativo"
+Write-Host "==> criando o plano do serviÃƒÆ’Ã‚Â§o de aplicativo"
 az appservice plan create -g $ResourceGroup -n $Plan -l $Location --sku B1 --is-linux
+Write-Host "==> Garantindo Azure Container Registry $AcrName"
+$acrDesiredName = $AcrName.ToLower()
+if ($acrDesiredName -ne $AcrName) {
+  Write-Warning "Nome do ACR deve ser minusculo. Usando $acrDesiredName."
+}
+$acrJson = az acr show -n $acrDesiredName --query "{name:name,resourceGroup:resourceGroup,loginServer:loginServer}" -o json 2>$null
+if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($acrJson)) {
+  Write-Host "   -> ACR nao encontrado. Criando..."
+  az acr create -n $acrDesiredName -g $ResourceGroup -l $Location --sku Basic | Out-Null
+  if ($LASTEXITCODE -ne 0) {
+    throw "Falha ao criar Azure Container Registry $acrDesiredName"
+  }
+  $acrJson = az acr show -n $acrDesiredName --query "{name:name,resourceGroup:resourceGroup,loginServer:loginServer}" -o json
+}
+if ([string]::IsNullOrWhiteSpace($acrJson)) {
+  throw "Nao foi possivel obter dados do ACR $acrDesiredName"
+}
+$acrInfo = $acrJson | ConvertFrom-Json
+$acrEffectiveName = $acrInfo.name
+if (-not $acrEffectiveName) {
+  throw "Retorno invalido ao consultar ACR $acrDesiredName"
+}
+if ($acrInfo.resourceGroup -and $acrInfo.resourceGroup -ne $ResourceGroup) {
+  Write-Warning "ACR $acrEffectiveName esta no resource group $($acrInfo.resourceGroup). Sera reutilizado mesmo assim."
+}
+az acr update -n $acrEffectiveName --admin-enabled true | Out-Null
 
-Write-Host "==> Criando o serviço de aplicativo"
-az webapp create -g $ResourceGroup -p $Plan -n trackyard-2TDSB --runtime "JAVA:17-java17"
+Write-Host "==> Criando o serviÃƒÆ’Ã‚Â§o de aplicativo"
+# Resolver login server do ACR e imagem completa
+$acrLoginServer = $acrInfo.loginServer
+$imageRef = "$acrLoginServer"+"/$ImageRepo"+":$ImageTag"
 
-Write-Host "==> Gerando o .jar"
-cd ..
-mvn -q -DskipTests package
+# Criar Web App com imagem ÃƒÆ’Ã‚Âºnica (-i)
+az webapp create -g $ResourceGroup -p $Plan -n $WebAppName -i $imageRef
 
-Write-Host "==> Definindo configurações do WebApp"
-az webapp config appsettings set -g $ResourceGroup -n trackyard-2TDSB --settings `
+Write-Host "==> Configurando contÃƒÆ’Ã‚Âªiner com credenciais do ACR"
+$acrUser = az acr credential show -n $acrEffectiveName --query username -o tsv
+$acrPass = az acr credential show -n $acrEffectiveName --query passwords[0].value -o tsv
+az webapp config container set -g $ResourceGroup -n $WebAppName -i $imageRef -r $acrLoginServer -u $acrUser -p $acrPass | Out-Null
+
+Write-Host "==> Definindo configuraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Âµes do WebApp"
+az webapp config appsettings set -g $ResourceGroup -n $WebAppName --settings `
   SPRING_DATASOURCE_URL=$jdbc `
   SPRING_DATASOURCE_USERNAME=$AdminUser `
   SPRING_DATASOURCE_PASSWORD=$AdminPass `
-  SPRING_DATASOURCE_DRIVER_CLASS_NAME="com.microsoft.sqlserver.jdbc.SQLServerDriver"
+  SPRING_DATASOURCE_DRIVER_CLASS_NAME="com.microsoft.sqlserver.jdbc.SQLServerDriver" `
+  WEBSITES_PORT=8080
 
-Write-Host "==> realizando deploy do WebApp"
-az webapp deploy -g $ResourceGroup -n trackyard-2TDSB --src-path target/trackyard-0.0.1-SNAPSHOT.jar --type jar
+# Deploy via container image configured acima (sem deploy JAR)
 
-Write-Host "==> Acesse: trackyard-2tdsb.azurewebsites.net/motos"
+Write-Host "==> Acesse: https://$WebAppName.azurewebsites.net/motos"
