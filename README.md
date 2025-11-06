@@ -81,7 +81,7 @@ Valores padrão definidos pelo script:
 
 ## 🛠️ Rodando a aplicação
 Para acessar a aplicação, basta entrar no link:
-[Trackyard](https://trackyard-2tdsb.azurewebsites.net/motos)
+[Trackyard](https://trackyard-2tdsb.azurewebsites.net/)
 
 ---
 
