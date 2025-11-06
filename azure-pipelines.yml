@@ -6,31 +6,41 @@ trigger:
 
 # Variáveis
 variables:
-- group: trackyard-secrets   # onde estão ACR_USERNAME / ACR_PASSWORD (se usar user/pass)
-- name: RG_NAME
-  value: 'rg-trackyard'
-- name: APP_NAME
-  value: 'trackyard-2TDSB'
-- name: ACR_NAME
-  value: 'acrtrackyard'      # sem espaço!
-- name: vmImage
-  value: 'ubuntu-latest'
-- name: dockerRegistryServiceConnection
-  value: 'acrtrackyard'      # NOME EXATO da Service Connection (ajuste aqui)
-- name: azureSubscription
-  value: 'azureTrackyard'    # NOME EXATO da Service Connection ARM
+  # Nome do Resource Group onde o Web App está (de provision-sql.ps1)
+  - name: RG_NAME
+    value: 'rg-trackyard'
+  # Nome do Azure Web App (Linux, Container) (de provision-sql.ps1)
+  - name: APP_NAME
+    value: 'trackyard-2TDSB'
+  # Nome do Azure Container Registry (sem domínio) (de provision-sql.ps1)
+  - name: ACR_NAME
+    value: 'acrtrackyard'
+  # Imagem do agente
+  - name: vmImage
+    value: 'ubuntu-latest'
+  # Opcional: grupo de variáveis para secrets (ACR_USERNAME, ACR_PASSWORD)
+  - group: trackyard-secrets
+  # Observações sobre Service Connections utilizadas:
+  - name: dockerRegistryServiceConnection
+    value: 'acrtrackyard'
+  - name: azureSubscription
+    value: 'azureTrackyard'
 
 stages:
-- stage: CI
-  displayName: 'CI - Build, Test e Imagem'
-  jobs:
-  - job: Build
-    displayName: 'Build Java e Push da Imagem no ACR'
-    pool:
-      name: 'Default'
-    steps:
-    - checkout: self
-      persistCredentials: false
+  # =============================
+  # CI: Build/Test e Imagem Docker
+  # =============================
+  - stage: CI
+    displayName: 'CI - Build, Test e Imagem'
+    jobs:
+      - job: Build
+        displayName: 'Build Java e Push da Imagem no ACR'
+        pool:
+          name: 'Default'
+        steps:
+          # Checkout do repositório
+          - checkout: self
+            persistCredentials: false
 
     - task: Maven@3
       displayName: 'Maven clean test package'
