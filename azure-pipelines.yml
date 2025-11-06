@@ -3,6 +3,7 @@
 trigger:
   - main
   - sprint4
+  - master
 
 variables:
   - group: trackyard-secrets
