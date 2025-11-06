@@ -79,16 +79,23 @@ Valores padrão definidos pelo script:
 
 ---
 
-## 🛠️ Rodando a aplicação
-Para acessar a aplicação, basta entrar no link:
-[Trackyard](https://trackyard-2tdsb.azurewebsites.net/)
+## 🛠️ Testes
+
+Para realizar os testes na api, testar os endpoints com a coleção do Postman, seguindo a seguinte rota:
+[Postman](https://bold-zodiac-707210.postman.co/workspace/Personal-Workspace~4701d561-f092-46f6-a63c-0560d2fd1507/collection/39387306-06cd5d63-7cab-4aaf-9c69-e5983de04042?action=share&source=copy-link&creator=39387306)
 
 ---
 
-## 🧪 CRUD via https
+## Acessar o Banco H2 (opicional)
 
-### Front-end
-Ao abrir o app no link retornado após a execução do deploy, o usuário pode testar o CRUD de todas as entidades através da própria interface gráfica do WebApp.
+O projeto usa o banco de dados em nuvem Azure.
+
+No app Azure Data Studio insira as seguintes credenciais:
+
+- Server: `sqltrackyard`
+- Authentication Type: `SQL Login`
+- Username: `adminuser` (ou o username personalizado)
+- Password: `SenhaSuperSegura123!` (ou a password personalizada)
 
 ---
 
@@ -101,16 +108,6 @@ Caso tenha personalizado o nome do grupo de recursos:
 ```powershell
 az group delete --name <nome-rg> --yes --no-wait
 ```
----
-
-## 🔑 Variáveis de ambiente utilizadas
-
-| Variável                                 | Descrição                       |
-|------------------------------------------|---------------------------------|
-| `SPRING_DATASOURCE_URL`                  | JDBC de conexão ao Azure SQL    |
-| `SPRING_DATASOURCE_USERNAME`             | Usuário do banco                |
-| `SPRING_DATASOURCE_PASSWORD`             | Senha do banco                  |
-| `SPRING_DATASOURCE_DRIVER_CLASS_NAME`    | Driver JDBC                     |
 
 ---
 
@@ -121,7 +118,7 @@ az group delete --name <nome-rg> --yes --no-wait
 - `repository/` → repositórios JPA  
 - `dto/` → objetos de transferência  
 - `exception/` → tratamento centralizado de erros  
-- `scripts/` → scripts Azure CLI + DDL (`script_bd.sql`) -> que foi ignorado tendo em vista que o Spring Boot exerce sua função
+- `scripts/` → scripts Azure CLI 
 
 ---
 
