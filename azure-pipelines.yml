@@ -1,35 +1,25 @@
 # Azure Pipelines para Trackyard
 
 trigger:
-- main
-- sprint4
+  - main
+  - sprint4
 
-# Variáveis
 variables:
-  # Nome do Resource Group onde o Web App está (de provision-sql.ps1)
+  - group: trackyard-secrets
   - name: RG_NAME
     value: 'rg-trackyard'
-  # Nome do Azure Web App (Linux, Container) (de provision-sql.ps1)
   - name: APP_NAME
     value: 'trackyard-2TDSB'
-  # Nome do Azure Container Registry (sem domínio) (de provision-sql.ps1)
   - name: ACR_NAME
     value: 'acrtrackyard'
-  # Imagem do agente
   - name: vmImage
     value: 'ubuntu-latest'
-  # Opcional: grupo de variáveis para secrets (ACR_USERNAME, ACR_PASSWORD)
-  - group: trackyard-secrets
-  # Observações sobre Service Connections utilizadas:
   - name: dockerRegistryServiceConnection
-    value: 'acrtrackyard'
+    value: 'acrTrackyard'
   - name: azureSubscription
     value: 'azureTrackyard'
 
 stages:
-  # =============================
-  # CI: Build/Test e Imagem Docker
-  # =============================
   - stage: CI
     displayName: 'CI - Build, Test e Imagem'
     jobs:
@@ -38,66 +28,65 @@ stages:
         pool:
           name: 'Default'
         steps:
-          # Checkout do repositório
           - checkout: self
             persistCredentials: false
 
-    - task: Maven@3
-      displayName: 'Maven clean test package'
-      inputs:
-        mavenPomFile: 'trackyard/pom.xml'
-        goals: 'clean test package'
-        publishJUnitResults: true
-        testResultsFiles: '**/surefire-reports/TEST-*.xml'
+          - task: Maven@3
+            displayName: 'Maven clean test package'
+            inputs:
+              mavenPomFile: 'trackyard/pom.xml'
+              goals: 'clean test package'
+              publishJUnitResults: true
+              testResultsFiles: '**/surefire-reports/TEST-*.xml'
 
-    - task: Docker@2
-      displayName: 'Docker buildAndPush -> ACR (latest + commit hash)'
-      inputs:
-        command: 'buildAndPush'
-        containerRegistry: '$(dockerRegistryServiceConnection)'   # Service Connection para o ACR
-        repository: 'trackyard'                                   # acrname.azurecr.io/trackyard
-        Dockerfile: 'trackyard/Dockerfile'
-        buildContext: 'trackyard'
-        tags: |
-          $(Build.SourceVersion)
-          latest
+          - task: Docker@2
+            displayName: 'Docker buildAndPush -> ACR (latest + commit hash)'
+            inputs:
+              command: 'buildAndPush'
+              containerRegistry: '$(dockerRegistryServiceConnection)'
+              repository: 'trackyard'
+              Dockerfile: 'trackyard/Dockerfile'
+              buildContext: 'trackyard'
+              tags: |
+                $(Build.SourceVersion)
+                latest
 
-    - task: PublishBuildArtifacts@1
-      displayName: 'Publicar artefato opcional (.jar)'
-      condition: succeeded()
-      inputs:
-        PathtoPublish: 'trackyard/target'
-        ArtifactName: 'java_package'
-        publishLocation: 'Container'
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publicar artefato opcional (.jar)'
+            condition: succeeded()
+            inputs:
+              PathtoPublish: 'trackyard/target'
+              ArtifactName: 'java_package'
+              publishLocation: 'Container'
 
-- stage: CD
-  displayName: 'CD - Deploy para Azure Web App (Container)'
-  dependsOn: CI
-  condition: succeeded()
-  jobs:
-  - job: Deploy
-    displayName: 'Configurar Web App para usar a imagem do commit'
-    pool:
-      vmImage: $(vmImage)
-    steps:
-    - task: AzureCLI@2
-      displayName: 'az webapp config container set (imagem do commit)'
-      inputs:
-        azureSubscription: '$(azureSubscription)'
-        scriptType: 'bash'
-        scriptLocation: 'inlineScript'
-        inlineScript: |
-          set -euo pipefail
+  - stage: CD
+    displayName: 'CD - Deploy para Azure Web App (Container)'
+    dependsOn: CI
+    condition: succeeded()
+    jobs:
+      - job: Deploy
+        displayName: 'Configurar Web App para usar a imagem do commit'
+        pool:
+          vmImage: $(vmImage)
+        steps:
+          - task: AzureCLI@2
+            displayName: 'az webapp config container set (imagem do commit)'
+            inputs:
+              azureSubscription: '$(azureSubscription)'
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                set -euo pipefail
 
-          IMAGE_TAG="$(Build.SourceVersion)"
-          IMAGE_NAME="$(ACR_NAME).azurecr.io/trackyard:${IMAGE_TAG}"
+                IMAGE_TAG="$(Build.SourceVersion)"
+                IMAGE_NAME="$(ACR_NAME).azurecr.io/trackyard:${IMAGE_TAG}"
 
-          echo "Definindo Web App $(APP_NAME) para imagem ${IMAGE_NAME}"
+                echo "Definindo Web App $(APP_NAME) para imagem ${IMAGE_NAME}"
 
-          az webapp config container set \
-            --resource-group "$(RG_NAME)" \
-            --name "$(APP_NAME)" \
-            --docker-custom-image-name "${IMAGE_NAME}" \
-            --docker-registry-server-url "https://$(ACR_NAME).azurecr.io" \
-            --docker-registry-server-user "$(ACR_USERNAME)" \
-            --docker-registry-server-password "$(ACR_PASSWORD)"
+                az webapp config container set \
+                  --resource-group "$(RG_NAME)" \
+                  --name "$(APP_NAME)" \
+                  --docker-custom-image-name "${IMAGE_NAME}" \
+                  --docker-registry-server-url "https://$(ACR_NAME).azurecr.io" \
+                  --docker-registry-server-user "$(ACR_USERNAME)" \
+                  --docker-registry-server-password "$(ACR_PASSWORD)"
