@@ -30,7 +30,7 @@ git clone https://github.com/LuigiBerzaghi/Sprint2Devops.git
 ```
 
 ---
-## ⚙️ Provisionamento geral da aplicação
+## ⚙️ Provisionamento geral do grupo de recursos
 
 Após "clonar" o repositório, execute o seguinte comando para ir ao diretório correto:
 
