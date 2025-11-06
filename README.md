@@ -82,7 +82,7 @@ Valores padrão definidos pelo script:
 ## 🛠️ Testes
 
 Para realizar os testes na api, testar os endpoints com a coleção do Postman, seguindo a seguinte rota:
-[Postman](https://bold-zodiac-707210.postman.co/workspace/Personal-Workspace~4701d561-f092-46f6-a63c-0560d2fd1507/collection/39387306-06cd5d63-7cab-4aaf-9c69-e5983de04042?action=share&source=copy-link&creator=39387306)
+[Postman](https://bold-zodiac-707210.postman.co/workspace/Personal-Workspace~4701d561-f092-46f6-a63c-0560d2fd1507/collection/39387306-6fe13412-81ea-4558-b955-ce34f4323903?action=share&source=copy-link&creator=39387306)
 
 ---
 
