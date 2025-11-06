@@ -38,7 +38,7 @@ Após "clonar" o repositório, execute o seguinte comando para ir ao diretório 
 cd Sprint2Devops/trackyard/scripts
 ```
 
-Agora, execute o script PowerShell para criar o **Resource Group**, **Servidor SQL** e **Database** da aplicação.
+Agora, execute o script PowerShell para criar o **Resource Group**, **Servidor SQL**, **Database** e **Conteineres de serviço** da aplicação.
 
 Caso queira personalizar apenas usuário e senha:
 
