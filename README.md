@@ -125,7 +125,7 @@ az group delete --name <nome-rg> --yes --no-wait
 
 ---
 
-##  👥 Equipe
+## 👥 Equipe
 
 - RM555516 - Luigi Berzaghi  
 - RM559093 - Guilherme Pelissari   
